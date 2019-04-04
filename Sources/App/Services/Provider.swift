@@ -9,17 +9,14 @@ import Vapor
 
 
 public struct FirestoreConfig: Service {
-    public let apiKey: String
-    public let testApiKey: String?
+    public let privateKey: String
+    public let email: String
+    public let projectId: String
 
-    public init(apiKey: String) {
-        self.apiKey = apiKey
-        self.testApiKey = nil
-    }
-
-    public init(productionKey: String, testKey: String) {
-        self.apiKey = productionKey
-        self.testApiKey = testKey
+    public init(projectId: String, email: String, privateKey: String) {
+        self.projectId = projectId
+        self.email = email
+        self.privateKey = privateKey
     }
 }
 
@@ -37,7 +34,7 @@ public final class FirestoreProvider: Provider {
         services.register { (container) -> FirestoreClient in
             let httpClient = try container.make(Client.self)
             let config = try container.make(FirestoreConfig.self)
-            return FirestoreClient(apiKey: config.apiKey, testKey: config.testApiKey, client: httpClient)
+            return FirestoreClient(client: httpClient, projectId: config.projectId, email: config.email, privateKey: config.privateKey)
         }
     }
 }
@@ -45,12 +42,10 @@ public final class FirestoreProvider: Provider {
 
 
 public struct FirestoreClient: Service {
-    public var routes: FirestoreRoutes
+    public var firestore: FirestoreRoutes
 
-    internal init(client: Client, basePath: String, email: String, privateKey: String) {
-        let apiRequest = FirestoreAPIRequest(httpClient: client, basePath: basePath, email: email, privateKey: privateKey)
-
-        routes = FirestoreRoutes(request: apiRequest)
-
+    internal init(client: Client, projectId: String, email: String, privateKey: String) {
+        let apiRequest = FirestoreAPIRequest(httpClient: client, projectId: projectId, email: email, privateKey: privateKey)
+        firestore = FirestoreRoutes(request: apiRequest)
     }
 }

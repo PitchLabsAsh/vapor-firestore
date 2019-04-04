@@ -13,5 +13,9 @@ public struct FirestoreRoutes {
     init(request: FirestoreRequest) {
         self.request = request
     }
-    
+
+    public func test(req: Request) throws -> Future<String> {
+        let sendReq: Future<String> = try self.request.getToken(req: req)
+        return sendReq
+    }
 }
