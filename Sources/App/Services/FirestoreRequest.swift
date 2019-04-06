@@ -16,7 +16,7 @@ public protocol FirestoreRequest {
 }
 
 public class FirestoreAPIRequest: FirestoreRequest {
-    private let decoder = JSONDecoder()
+    private let decoder = JSONDecoder.firestore
     private let httpClient: Client
     private let basePath: String
     private let baseUrl: URL
@@ -28,7 +28,7 @@ public class FirestoreAPIRequest: FirestoreRequest {
 
     public init(httpClient: Client, projectId: String, email: String, privateKey: String) {
         self.basePath = "projects/\(projectId)/databases/(default)/documents/"
-        self.baseUrl = URL(string: "https://firestore.googleapis.com/v1beta1/")!
+        self.baseUrl = URL(string: "https://firestore.googleapis.com/v1/")!
         self.httpClient = httpClient
         self.email = email
         self.privateKey = privateKey

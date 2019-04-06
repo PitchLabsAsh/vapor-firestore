@@ -15,7 +15,8 @@ final class AppTests: XCTestCase {
 
     static let allTests = [
         ("testAuthToken", testAuthToken,
-         "testCreatDoc", testCreateDoc)
+         "testCreatDoc", testCreateDoc,
+         "testListDocs", testListDocs)
     ]
 
     override func setUp() {
@@ -24,27 +25,42 @@ final class AppTests: XCTestCase {
     }
 
     func testAuthToken() throws {
+        do {
+            let client = try self.app.make(FirestoreClient.self)
+            let request = Request(using: self.app)
+
+            let result = try client.firestore.test(req: request).wait()
+
+            expect(result).toNot(beEmpty())
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func testCreateDoc() throws {
 //        do {
 //            let client = try self.app.make(FirestoreClient.self)
 //            let request = Request(using: self.app)
+//            let testObject = TestFields(title: Firestore.StringValue("A title"), subTitle: Firestore.StringValue("A subtitle"))
 //
-//            let result = try client.firestore.test(req: request).wait()
+//            let result = try client.firestore.createDocument(path: "test", body: testObject, on: request).wait()
 //
-//            expect(result).toNot(beEmpty())
+//            expect(result).toNot(beNil())
 //        } catch {
 //            XCTFail(error.localizedDescription)
 //        }
     }
 
-    func testCreateDoc() throws {
+    func testListDocs() throws {
         do {
             let client = try self.app.make(FirestoreClient.self)
             let request = Request(using: self.app)
-            let testObject = TestFields(title: Firestore.StringValue("A title"), subTitle: Firestore.StringValue("A subtitle"))
 
-            let result = try client.firestore.createDocument(path: "test", body: testObject, on: request).wait()
+            let result: [Firestore.Document<TestFields>] = try client.firestore.listDocuments(path: "test", on: request).wait()
 
             expect(result).toNot(beNil())
+            expect(result[0].fields?.title).toNot(beNil())
+            expect(result[0].fields?.subTitle).toNot(beNil())
         } catch {
             XCTFail(error.localizedDescription)
         }
