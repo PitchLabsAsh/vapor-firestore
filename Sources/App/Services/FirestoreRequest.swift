@@ -11,7 +11,8 @@ import JWT
 
 public protocol FirestoreRequest {
 //    func send<F: Decodable, T: Content>(req: Request, method: HTTPMethod, path: [String], body: T, headers: HTTPHeaders) throws -> Future<F>
-    func getToken(req: Request) throws -> Future<String>
+    func getToken() throws -> Future<String>
+    func send<F: Decodable, T: Content>(req: Request, method: HTTPMethod, path: String, body: T, headers: HTTPHeaders) throws -> Future<F>
 }
 
 public class FirestoreAPIRequest: FirestoreRequest {
@@ -41,13 +42,13 @@ public class FirestoreAPIRequest: FirestoreRequest {
         }
     }
 
-    public func  getToken(req: Request) throws -> Future<String> {
+    public func  getToken() throws -> Future<String> {
         guard let signer = signer else {
             throw FirestoreError.signing
         }
 
         if (authTokenExpireAt > Date() ) {
-            return Future.map(on: req) { self.authToken }
+            return Future.map(on: self.httpClient.container) { self.authToken }
         }
 
         let jwt = JWT(header: JWTHeader(alg: "RS256"), payload: Firestore.Auth.Payload(iss: IssuerClaim(value: self.email)))
@@ -72,14 +73,30 @@ public class FirestoreAPIRequest: FirestoreRequest {
         }
     }
 
-//
-//    public func send<F: Decodable, T: Content>(req: Request, method: HTTPMethod, path: [String], body: T, headers: HTTPHeaders) throws -> Future<F> {
-//        return try self.createRequest(method: method, path: path, query: nil, body: body, headers: headers).flatMap({ (request) in
-//            return self.httpClient.send(request).flatMap(to: F.self) { response in
-//                guard response.http.status == .ok else { throw FirestoreError.requestFailed }
-//                return try self.decoder.decode(F.self, from: response.http, maxSize: 65_536, on: req)
-//            }
-//        })
-//    }
-//
+    private func createRequest<T: Content>(method: HTTPMethod, path: String, body: T, headers: HTTPHeaders)throws -> Future<Request> {
+        return try getToken().map({ (accessToken) in
+            let url = (path.hasPrefix(self.basePath)) ? self.baseUrl : self.baseUrl.appendingPathComponent(self.basePath)
+            let uri = url.appendingPathComponent(path).absoluteString
+            let request = Request(using: self.httpClient.container)
+            try request.content.encode(body)
+
+            var hdrs = HTTPHeaders()
+            hdrs.bearerAuthorization = BearerAuthorization(token: self.authToken)
+
+            request.http.method = method
+            request.http.headers = hdrs
+            request.http.url = URL(string: uri)!
+            return request
+        })
+    }
+
+    public func send<F: Decodable, T: Content>(req: Request, method: HTTPMethod, path: String, body: T, headers: HTTPHeaders) throws -> Future<F> {
+        return try self.createRequest(method: method, path: path, body: body, headers: headers).flatMap({ (request) in
+            return self.httpClient.send(request).flatMap(to: F.self) { response in
+                guard response.http.status == .ok else { throw FirestoreError.requestFailed }
+                return try self.decoder.decode(F.self, from: response.http, maxSize: 65_536, on: req)
+            }
+        })
+    }
 }
+

@@ -2,6 +2,7 @@
 import Foundation
 import Vapor
 
+
 class CreateApp {
     static func makeApp() -> Application {
         let privateKey = ***REMOVED***
@@ -18,4 +19,6 @@ class CreateApp {
 
         return try! Application(config: config, environment: env, services: services)
     }
+
+
 }

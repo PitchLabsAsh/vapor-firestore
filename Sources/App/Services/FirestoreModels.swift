@@ -86,6 +86,7 @@ public enum Firestore
     enum Create
     {
         public struct Request<T: Codable>: Content {
+            public let name: String
             public let fields: T?
         }
         
