@@ -23,6 +23,7 @@ public struct FirestoreRoutes {
         let sendReq: Future<Firestore.Document<T>> = try self.request.send(
             method: .GET,
             path: path,
+            query: "",
             body: .empty,
             headers: [:])
         return sendReq
@@ -32,6 +33,7 @@ public struct FirestoreRoutes {
         let sendReq: Future<Firestore.List.Response<T>> = try self.request.send(
             method: .GET,
             path: path,
+            query: "",
             body: .empty,
             headers: [:])
         return sendReq.map(to: [Firestore.Document<T>].self) { response in
@@ -39,11 +41,28 @@ public struct FirestoreRoutes {
         }
     }
 
-    func createDocument<T: Codable>(path: String, body: T, on req: Request) throws -> Future<Firestore.Document<T>> {
-        let requestBody = try JSONEncoder().encode(["fields": body]).convertToHTTPBody()
+    func createDocument<T: Codable>(path: String, fields: T, on req: Request) throws -> Future<Firestore.Document<T>> {
+        let requestBody = try JSONEncoder.firestore.encode(["fields": fields]).convertToHTTPBody()
         let sendReq: Future<Firestore.Document<T>> = try self.request.send(
             method: .POST,
             path: path,
+            query: "",
+            body: requestBody,
+            headers: [:])
+        return sendReq
+    }
+
+    func updateDocument<T: Codable>(path: String, fields: T, updateMask: [String]?, on req: Request) throws -> Future<Firestore.Document<T>> {
+        var queryParams = ""
+        if let updateMask = updateMask {
+            queryParams = updateMask.map({ "updateMask.fieldPaths=\($0)" }).joined(separator: "&")
+        }
+
+        let requestBody = try JSONEncoder.firestore.encode(["fields": fields]).convertToHTTPBody()
+        let sendReq: Future<Firestore.Document<T>> = try self.request.send(
+            method: .PATCH,
+            path: path,
+            query: queryParams,
             body: requestBody,
             headers: [:])
         return sendReq

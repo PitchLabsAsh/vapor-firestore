@@ -8,6 +8,10 @@ struct TestFields: Codable {
     var subTitle: Firestore.StringValue
 }
 
+struct TestUpdateFields: Codable {
+    var title: Firestore.StringValue
+}
+
 
 final class AppTests: XCTestCase {
 
@@ -16,6 +20,7 @@ final class AppTests: XCTestCase {
     static let allTests = [
         ("testAuthToken", testAuthToken,
          "testCreatDoc", testCreateDoc,
+         "testUpdateDoc", testUpdateDoc,
          "testListDocs", testListDocs,
          "testGetDoc", testGetDoc)
     ]
@@ -44,7 +49,20 @@ final class AppTests: XCTestCase {
             let request = Request(using: self.app)
             let testObject = TestFields(title: Firestore.StringValue("A title"), subTitle: Firestore.StringValue("A subtitle"))
 
-            let result = try client.firestore.createDocument(path: "test", body: testObject, on: request).wait()
+            let result = try client.firestore.createDocument(path: "test", fields: testObject, on: request).wait()
+
+            expect(result).toNot(beNil())
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func testUpdateDoc() throws {
+        do {
+            let client = try self.app.make(FirestoreClient.self)
+            let request = Request(using: self.app)
+            let testObject = TestUpdateFields(title: Firestore.StringValue("An updated title again"))
+            let result = try client.firestore.updateDocument(path: "test/8qPHgTQkuKYSbNMoyLNX", fields: testObject, updateMask: ["title"], on: request).wait()
 
             expect(result).toNot(beNil())
         } catch {
@@ -72,7 +90,7 @@ final class AppTests: XCTestCase {
             let client = try self.app.make(FirestoreClient.self)
             let request = Request(using: self.app)
 
-            let result: Firestore.Document<TestFields> = try client.firestore.getDocument(path: "test/8qPHgTQkuKYSbNMoyLNX", on: request).wait()
+            let result: Firestore.Document<TestFields> = try client.firestore.getDocument(path: "test/YezP5mz26vmHSXxwhrlb", on: request).wait()
 
             expect(result).toNot(beNil())
             expect(result.fields?.title).toNot(beNil())
