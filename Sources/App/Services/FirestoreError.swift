@@ -1,5 +1,6 @@
 import Foundation
 
+
 struct FirestoreErrorResponse: Codable {
     struct FirestoreErrorResponseBody: Codable {
         let code: Int
@@ -11,9 +12,7 @@ struct FirestoreErrorResponse: Codable {
 }
 
 enum FirestoreError: Error {
-    case invalidURL
     case requestFailed
-    case invalidAccessToken
     case signing
     case parseFailed(data: String)
     case response(error: FirestoreErrorResponse)

@@ -16,7 +16,8 @@ final class AppTests: XCTestCase {
     static let allTests = [
         ("testAuthToken", testAuthToken,
          "testCreatDoc", testCreateDoc,
-         "testListDocs", testListDocs)
+         "testListDocs", testListDocs,
+         "testGetDoc", testGetDoc)
     ]
 
     override func setUp() {
@@ -38,17 +39,17 @@ final class AppTests: XCTestCase {
     }
 
     func testCreateDoc() throws {
-//        do {
-//            let client = try self.app.make(FirestoreClient.self)
-//            let request = Request(using: self.app)
-//            let testObject = TestFields(title: Firestore.StringValue("A title"), subTitle: Firestore.StringValue("A subtitle"))
-//
-//            let result = try client.firestore.createDocument(path: "test", body: testObject, on: request).wait()
-//
-//            expect(result).toNot(beNil())
-//        } catch {
-//            XCTFail(error.localizedDescription)
-//        }
+        do {
+            let client = try self.app.make(FirestoreClient.self)
+            let request = Request(using: self.app)
+            let testObject = TestFields(title: Firestore.StringValue("A title"), subTitle: Firestore.StringValue("A subtitle"))
+
+            let result = try client.firestore.createDocument(path: "test", body: testObject, on: request).wait()
+
+            expect(result).toNot(beNil())
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
     }
 
     func testListDocs() throws {
@@ -61,6 +62,21 @@ final class AppTests: XCTestCase {
             expect(result).toNot(beNil())
             expect(result[0].fields?.title).toNot(beNil())
             expect(result[0].fields?.subTitle).toNot(beNil())
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func testGetDoc() throws {
+        do {
+            let client = try self.app.make(FirestoreClient.self)
+            let request = Request(using: self.app)
+
+            let result: Firestore.Document<TestFields> = try client.firestore.getDocument(path: "test/8qPHgTQkuKYSbNMoyLNX", on: request).wait()
+
+            expect(result).toNot(beNil())
+            expect(result.fields?.title).toNot(beNil())
+            expect(result.fields?.subTitle).toNot(beNil())
         } catch {
             XCTFail(error.localizedDescription)
         }

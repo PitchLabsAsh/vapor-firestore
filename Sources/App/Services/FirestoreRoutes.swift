@@ -21,20 +21,18 @@ public struct FirestoreRoutes {
 
     public func getDocument<T: Decodable>(path: String, on req: Request) throws -> Future<Firestore.Document<T>> {
         let sendReq: Future<Firestore.Document<T>> = try self.request.send(
-            req: req,
             method: .GET,
             path: path,
-            body: "",
+            body: .empty,
             headers: [:])
         return sendReq
     }
 
     public func listDocuments<T: Decodable>(path: String, on req: Request) throws -> Future<[Firestore.Document<T>]> {
         let sendReq: Future<Firestore.List.Response<T>> = try self.request.send(
-            req: req,
             method: .GET,
             path: path,
-            body: "",
+            body: .empty,
             headers: [:])
         return sendReq.map(to: [Firestore.Document<T>].self) { response in
             return response.documents
@@ -42,11 +40,11 @@ public struct FirestoreRoutes {
     }
 
     func createDocument<T: Codable>(path: String, body: T, on req: Request) throws -> Future<Firestore.Document<T>> {
+        let requestBody = try JSONEncoder().encode(["fields": body]).convertToHTTPBody()
         let sendReq: Future<Firestore.Document<T>> = try self.request.send(
-            req: req,
             method: .POST,
             path: path,
-            body: Firestore.Create.Request(name: "test", fields: body),
+            body: requestBody,
             headers: [:])
         return sendReq
     }
