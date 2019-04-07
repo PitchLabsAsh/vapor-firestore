@@ -40,6 +40,12 @@ services.register(firestoreConfig)
 try! services.register(FirestoreProvider())
 ```
 
+## Testing
+
+The Vapor-Firstore project contains some example simple unit tests. If you want to run these tests you will need to create a test Firestore database and add the service account credentials to `Application+Testing.swift`.
+The testUpdateDoc and testGetDoc tests require a document to exist before they will pass. The easiest way to do this is to first run just the testCreateDoc test which will create a document of the test structure and output its object-id. Cut and paste this id into the update and get tests and then comment out testCreateDoc to avoid continually createing documents everytime you run the tests.
+
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
