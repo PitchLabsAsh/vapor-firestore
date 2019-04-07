@@ -11,7 +11,6 @@ import JWT
 
 public protocol FirestoreRequest {
     func getToken() throws -> Future<String>
-//    func send<F: Decodable, T: Content>(method: HTTPMethod, path: String, body: T, headers: HTTPHeaders) throws -> Future<F>
     func send<F: Decodable>(method: HTTPMethod, path: String, query:String, body: HTTPBody, headers: HTTPHeaders) throws -> Future<F>
 }
 
@@ -73,32 +72,6 @@ public class FirestoreAPIRequest: FirestoreRequest {
             return authResponse.accessToken
         }
     }
-
-//    private func createRequest<T: Content>(method: HTTPMethod, path: String, body: T, headers: HTTPHeaders)throws -> Future<Request> {
-//        return try getToken().map({ (accessToken) in
-//            let url = (path.hasPrefix(self.basePath)) ? self.baseUrl : self.baseUrl.appendingPathComponent(self.basePath)
-//            let uri = url.appendingPathComponent(path).absoluteString
-//            let request = Request(using: self.httpClient.container)
-//            try request.content.encode(body)
-//
-//            var hdrs = HTTPHeaders()
-//            hdrs.bearerAuthorization = BearerAuthorization(token: self.authToken)
-//
-//            request.http.method = method
-//            request.http.headers = hdrs
-//            request.http.url = URL(string: uri)!
-//            return request
-//        })
-//    }
-//
-//    public func send<F: Decodable, T: Content>(method: HTTPMethod, path: String, body: T, headers: HTTPHeaders) throws -> Future<F> {
-//        return try self.createRequest(method: method, path: path, body: body, headers: headers).flatMap({ (request) in
-//            return self.httpClient.send(request).flatMap(to: F.self) { response in
-//                guard response.http.status == .ok else { throw FirestoreError.requestFailed }
-//                return try self.decoder.decode(F.self, from: response.http, maxSize: 65_536, on: self.httpClient.container)
-//            }
-//        })
-//    }
 
     public func send<F: Decodable>(method: HTTPMethod, path: String, query:String, body: HTTPBody, headers: HTTPHeaders) throws -> Future<F> {
         return try getToken().flatMap({ (accessToken) in
