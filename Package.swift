@@ -2,9 +2,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "vapor-firestore",
+    name: "VaporFirestore",
     products: [
-        .library(name: "vapor-firestore", targets: ["App"]),
+        .library(name: "VaporFirestore", targets: ["VaporFirestore"]),
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -13,9 +13,8 @@ let package = Package(
         .package(url: "https://github.com/Quick/Nimble.git", from: "8.0.0")
     ],
     targets: [
-        .target(name: "App", dependencies: ["Vapor", "JWT"]),
-        .target(name: "Run", dependencies: ["App"]),
-        .testTarget(name: "AppTests", dependencies: ["App", "Nimble"])
+        .target(name: "VaporFirestore", dependencies: ["Vapor", "JWT"]),
+        .testTarget(name: "VaporFirestoreTests", dependencies: ["VaporFirestore", "Nimble"])
     ]
 )
 

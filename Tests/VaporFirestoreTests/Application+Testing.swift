@@ -1,5 +1,5 @@
-@testable import App
 import Foundation
+import VaporFirestore
 import Vapor
 
 

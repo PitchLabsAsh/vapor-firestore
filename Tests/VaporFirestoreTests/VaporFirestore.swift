@@ -1,5 +1,5 @@
-@testable import App
 import Vapor
+import VaporFirestore
 import XCTest
 import Nimble
 
@@ -13,7 +13,7 @@ struct TestUpdateFields: Codable {
 }
 
 
-final class AppTests: XCTestCase {
+final class VaporFirestoreTests: XCTestCase {
 
     var app: Application!
 
