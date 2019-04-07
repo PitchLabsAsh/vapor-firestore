@@ -40,6 +40,59 @@ services.register(firestoreConfig)
 try! services.register(FirestoreProvider())
 ```
 
+## Usage
+
+First setup a model for your document. The current implementation of Vapor-Firestore uses helper wrappers when defining documents for example:
+
+```swift
+struct ArticleFields: Codable {
+    var title: Firestore.StringValue
+    var subTitle: Firestore.StringValue
+    var isAvailable: Firestore.BooleanValue
+    var publishedAt: Firestore.TimestampValue
+    var likeCount: Firestore.IntegerValue
+}
+```
+
+To create a new document using this model:
+
+```swift
+let testObject = ArticleFields(title: Firestore.StringValue("A title"), subTitle: Firestore.StringValue("A subtitle"), isAvailable: Firestore.BooleanValue(true), publishedAt: Firestore.TimestampValue(Date()), likeCount: Firestore.IntegerValue(1))
+
+let result = try client.firestore.createDocument(path: "test", fields: testObject, on: request)
+```
+
+To retrieve an array of all objects in this collection using this model:
+
+```swift
+let result: [Firestore.Document<ArticleFields>] = try client.firestore.listDocuments(path: "test", on: request)
+```
+
+To retrieve an individual object in this collection using this model:
+
+```swift
+let result: Firestore.Document<ArticleFields> = try client.firestore.getDocument(path: "test/<object-id>", on: request)
+```
+
+To update a document with all fields:
+
+```swift
+let result = try client.firestore.updateDocument(path: "test/<object-id>", fields: testObject, updateMask: nil, on: request)
+```
+
+To update specific fields of a document you must declare a new model with only those fields and pass a mask:
+
+```swift
+
+struct ArticleUpdateFields: Codable {
+    var title: Firestore.StringValue
+}
+
+let updateObject = ArticleUpdateFields(title: Firestore.StringValue("An updated title again"))
+let result = try client.firestore.updateDocument(path: "test/<object-id>", fields: updateObject, updateMask: ["title"], on: request)
+```
+
+
 ## Testing
 
 The Vapor-Firstore project contains some example simple unit tests. If you want to run these tests you will need to create a test Firestore database and add the service account credentials to `Application+Testing.swift`.
