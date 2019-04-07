@@ -50,8 +50,9 @@ final class VaporFirestoreTests: XCTestCase {
             let testObject = TestFields(title: Firestore.StringValue("A title"), subTitle: Firestore.StringValue("A subtitle"))
 
             let result = try client.firestore.createDocument(path: "test", fields: testObject, on: request).wait()
-
             expect(result).toNot(beNil())
+
+            print("Test object-id: \( (result.name as NSString).lastPathComponent)")
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -62,7 +63,7 @@ final class VaporFirestoreTests: XCTestCase {
             let client = try self.app.make(FirestoreClient.self)
             let request = Request(using: self.app)
             let testObject = TestUpdateFields(title: Firestore.StringValue("An updated title again"))
-            let result = try client.firestore.updateDocument(path: "test/8qPHgTQkuKYSbNMoyLNX", fields: testObject, updateMask: ["title"], on: request).wait()
+            let result = try client.firestore.updateDocument(path: "test/<object-id>", fields: testObject, updateMask: ["title"], on: request).wait()
 
             expect(result).toNot(beNil())
         } catch {
@@ -90,7 +91,7 @@ final class VaporFirestoreTests: XCTestCase {
             let client = try self.app.make(FirestoreClient.self)
             let request = Request(using: self.app)
 
-            let result: Firestore.Document<TestFields> = try client.firestore.getDocument(path: "test/YezP5mz26vmHSXxwhrlb", on: request).wait()
+            let result: Firestore.Document<TestFields> = try client.firestore.getDocument(path: "test/<object-id>", on: request).wait()
 
             expect(result).toNot(beNil())
             expect(result.fields?.title).toNot(beNil())
